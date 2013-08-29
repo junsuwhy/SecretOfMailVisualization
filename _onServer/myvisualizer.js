@@ -4,6 +4,42 @@ var $g1=null;
 var $jsonData=null;
 var $currArray=null;
 
+var $x;
+var $y;
+
+//換區間
+showTimeRange=function(intVal){
+	arrYPosition=[];
+	for (var i = 0; i < $currArray.length; i++) {
+		if(i%intVal==0)lastTotal=0;
+		arrYPosition[i]=lastTotal+$currArray[i];
+		lastTotal=arrYPosition[i];
+	};
+
+	
+	$svg.selectAll('rect').transition().duration(1500).delay(function(d,i){
+		return i*30
+	})
+	.attr('y',function(d,i){
+		return height-padding-$y(arrYPosition[i]/intVal);
+	})
+	.attr('height',function(d,i){
+		return $y(d/intVal)
+	})
+	.attr('x',function(d,i){
+		return padding+$x(i-i%intVal)-rectWidth($currArray);
+	})
+	.attr('width',function(d,i){
+		return (width-2*padding)/($currArray.length/intVal)-rectWidth($currArray)
+	})
+
+	;
+
+
+
+}
+
+//排序
 showsortit=function(bVal){
 	if(bVal){
 		sortArray=$currArray.concat().sort(function(a,b){return b-a});
@@ -11,25 +47,28 @@ showsortit=function(bVal){
 		for (var i = 0; i < sortArray.length; i++) {
 			orderArray[i]=sortArray.indexOf($currArray[i]);
 		};
+
 		$svg.selectAll('rect').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+orderArray[i]*unitWidth($currArray)-rectWidth($currArray);
+			return padding+$x(orderArray[i])-rectWidth($currArray);
 		});
+
 		$svg.selectAll('.tag').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+orderArray[i]*unitWidth($currArray)-(1.5)*rectWidth($currArray);
+			return padding+$x(orderArray[i])-(1.5)*rectWidth($currArray);
 		});
+
 		$svg.selectAll('.value').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('transform',function(d,i){
 			str="";
 			str+='translate(';
-			str+=(padding+orderArray[i]*unitWidth($currArray));
+			str+=(padding+$x(orderArray[i]));
 			str+=',';
 			str+=(height-padding-d*ylength/arrMax($currArray))-em;
 			str+=')';
@@ -47,13 +86,13 @@ showsortit=function(bVal){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+i*unitWidth($currArray)-rectWidth($currArray);
+			return padding+$x(i)-rectWidth($currArray);
 		});
 		$svg.selectAll('.tag').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+i*unitWidth($currArray)-(1.5)*rectWidth($currArray);
+			return padding+$x(i)-(1.5)*rectWidth($currArray);
 		});
 		$svg.selectAll('.value').transition().duration(1500).delay(function(d,i){
 			return i*30
@@ -61,9 +100,9 @@ showsortit=function(bVal){
 		.attr('transform',function(d,i){
 			str="";
 			str+='translate(';
-			str+=(padding+i*unitWidth($currArray));
+			str+=(padding+$x(i));
 			str+=',';
-			str+=(height-padding-d*ylength/arrMax($currArray))-em;
+			str+=(height-padding-$y(d))-em;
 			str+=')';
 			str+='rotate(-90)';
 			return str;
@@ -142,11 +181,14 @@ visualize=function(jsonData,dataType){
 		//console.log($currArray);
 
 
+		$x=d3.scale.ordinal().domain(d3.range($currArray.length)).rangePoints([0,width-2*padding]);
+		$y=d3.scale.linear().domain([0,arrMax()]).range([0,height-2*padding]);
+
 		$D3currArray=$g1.data($currArray).enter();
 
 		$D3currArray.append('rect')
 			.attr('x',function(d,i){
-				return padding+i*unitWidth($currArray)-rectWidth($currArray);
+				return padding+$x(i)-rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding;
@@ -158,17 +200,17 @@ visualize=function(jsonData,dataType){
 			.transition()
 			.duration(1500)
 			.attr('y',function(d,i){
-				return height-padding-d*ylength/arrMax($currArray);
+				return height-padding-$y(d);
 			})
 			.attr('height',function(d,i){
-				return d*ylength/arrMax($currArray)
+				return $y(d)
 			})
 			.attr('fill','blue');
 
 		//加入tag的字
 		$D3currArray.append('text').text(function(d,i){return i})
 			.attr('x',function(d,i){
-				return padding+i*unitWidth($currArray)-(1.5)*rectWidth($currArray);
+				return padding+$x(i)-(1.5)*rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding+em;
@@ -186,9 +228,9 @@ visualize=function(jsonData,dataType){
 			.attr('transform',function(d,i){
 				str="";
 				str+='translate(';
-				str+=(padding+i*unitWidth($currArray));
+				str+=(padding+$x(i));
 				str+=',';
-				str+=(height-padding-d*ylength/arrMax($currArray))-em;
+				str+=(height-padding-$y(d))-em;
 				str+=')';
 				str+='rotate(-90)';
 				return str;

@@ -16,6 +16,28 @@
       <option value="cmet.w">cmet.w</option>
     </select>
     <input type="checkbox" id="sortit">排序</input>
+      
+    <div id='timeMerge' style='display:inline;'>
+      <span>週期:</span>
+    <select id='hourRange' class='timeMerge'>
+      <option value='1' selected='selected' selected='selceted'>1小時</option>
+      <option value='2' selected='selected'>2小時</option>
+      <option value='3' selected='selected'>3小時</option>
+      <option value='4' selected='selected'>4小時</option>
+      <option value='6' selected='selected'>6小時</option>
+    </select>
+
+      <span>Offset:</span>
+      <select id='hourOffset' class='timeMerge'>
+      <option value='0' selected='selected' selected='selceted'>0</option>
+      <option value='1' selected='selected'>1</option>
+      <option value='2' selected='selected'>2</option>
+      <option value='3' selected='selected'>3</option>
+      <option value='4' selected='selected'>4</option>
+      <option value='5' selected='selected'>5</option>
+    </select>
+  </div>
+      
   </div>
 <div id='svg-container'>
 
@@ -55,12 +77,22 @@ strDataset="";
           $('#selector').change(function(){
             visualize(objDataset,$('#selector').val());
              $('#sortit').removeAttr("checked");
+             if($('#selector').val()[5]=='w'){
+              $('#timeMerge').hide();
+            }else{
+              $('#timeMerge').show();
+            }
           });
 
           //排序
           $('#sortit').change(function(){
             showsortit($('#sortit').is(":checked"));
           });
+
+          //推疊
+          $('.timeMerge').change(function(){
+            showTimeRange($('#hourRange').val(),$('#hourOffset').val());
+          })
 
         }
       }
