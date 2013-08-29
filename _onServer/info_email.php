@@ -10,11 +10,12 @@
 <body>
   <div>
     <select id='selector'>
-      <option value="cmeo.h" selected>cmeo.h</option>
+      <option value="cmeo.h" selected="selected">cmeo.h</option>
       <option value="cmeo.w">cmeo.w</option>
       <option value="cmet.h">cmet.h</option>
       <option value="cmet.w">cmet.w</option>
     </select>
+    <input type="checkbox" id="sortit">排序</input>
   </div>
 <div id='svg-container'>
 
@@ -49,40 +50,23 @@ strDataset="";
           objDataset=$.parseJSON(strDataset);
           visualize(objDataset,"cmeo.h");
           //$('#result').html(strDataset);
-          
 
-
-          //處理資料
-          /*
-          $svg=d3
-            .select('body')
-            .select('div#svg-container')
-            .select('svg')
-            .attr('width',w)
-            .attr('height',h)
-            .attr('id','new-svg');
-
-          $circles=$svg.selectAll()
-          .data(arrFromObj(objDataset['cmeo.w']))
-          .enter()
-          .append('circle')
-          .attr('fill','black')
-          .attr('cx',function(d,i){
-            return 70+i*100;
-          })
-          .attr('cy',50)
-          .attr('r',function(d,i){
-            return d/5000;
+          //換別種type
+          $('#selector').change(function(){
+            visualize(objDataset,$('#selector').val());
+             $('#sortit').removeAttr("checked");
           });
-          */
+
+          //排序
+          $('#sortit').change(function(){
+            showsortit($('#sortit').is(":checked"));
+          });
+
         }
       }
   });
 
-//換別種type
-$('#selector').change(function(){
-  visualize(objDataset,$('#selector').val());
-});
+
 
 </script>
 </body>

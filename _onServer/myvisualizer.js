@@ -1,12 +1,77 @@
+var $D3currArray=null;
+var $svg=null;
+var $g1=null;
+var $jsonData=null;
+var $currArray=null;
+
+showsortit=function(bVal){
+	if(bVal){
+		sortArray=$currArray.concat().sort(function(a,b){return b-a});
+		var orderArray=[];
+		for (var i = 0; i < sortArray.length; i++) {
+			orderArray[i]=sortArray.indexOf($currArray[i]);
+		};
+		$svg.selectAll('rect').transition().duration(1500)
+		.attr('x',function(d,i){
+			return padding+orderArray[i]*unitWidth($currArray)-rectWidth($currArray);
+		});
+		$svg.selectAll('.tag').transition().duration(1500)
+		.attr('x',function(d,i){
+			return padding+orderArray[i]*unitWidth($currArray)-(1.5)*rectWidth($currArray);
+		});
+		$svg.selectAll('.value').transition().duration(1500)
+		.attr('transform',function(d,i){
+			str="";
+			str+='translate(';
+			str+=(padding+orderArray[i]*unitWidth($currArray));
+			str+=',';
+			str+=(height-padding-d*ylength/arrMax($currArray))-em;
+			str+=')';
+			str+='rotate(-90)';
+			return str;
+		});
+	}
+	else{
+		sortArray=$currArray.concat().sort(function(a,b){return b-a});
+		var orderArray=[];
+		for (var i = 0; i < sortArray.length; i++) {
+			orderArray[i]=sortArray.indexOf($currArray[i]);
+		};
+		$svg.selectAll('rect').transition().duration(1500)
+		.attr('x',function(d,i){
+			return padding+i*unitWidth($currArray)-rectWidth($currArray);
+		});
+		$svg.selectAll('.tag').transition().duration(1500)
+		.attr('x',function(d,i){
+			return padding+i*unitWidth($currArray)-(1.5)*rectWidth($currArray);
+		});
+		$svg.selectAll('.value').transition().duration(1500)
+		.attr('transform',function(d,i){
+			str="";
+			str+='translate(';
+			str+=(padding+i*unitWidth($currArray));
+			str+=',';
+			str+=(height-padding-d*ylength/arrMax($currArray))-em;
+			str+=')';
+			str+='rotate(-90)';
+			return str;
+		});
+	}
+	
+
+
+};
+
 visualize=function(jsonData,dataType){
 
 	console.log(jsonData);
+	$jsonData=jsonData;
 
 	//取得cmet/cmeo的比例
 	//horw代入"h"或"w"可取得hour 或weekday的值
 	arrCmetOverCmeo=function(horw){
-		arrCmet=arrFromObj(jsonData["cmet."+horw]);
-		arrCmeo=arrFromObj(jsonData["cmeo."+horw])
+		arrCmet=arrFromObj($jsonData["cmet."+horw]);
+		arrCmeo=arrFromObj($jsonData["cmeo."+horw])
 		arr=new Array();
 		for (var i = 0; i < arrCmet.length; i++) {
 			arr.push(arrCmet[i]/arrCmeo[i]);
@@ -42,9 +107,9 @@ visualize=function(jsonData,dataType){
 
 	//取得最大值
 	arrMax=function(){
-		max=arr[0]
-		for (var i = 0; i < arr.length; i++) {
-			if(arr[i]>max)max=arr[i];
+		max=$currArray[0]
+		for (var i = 0; i < $currArray.length; i++) {
+			if($currArray[i]>max)max=$currArray[i];
 		};
 		return max;
 	}
@@ -60,61 +125,64 @@ visualize=function(jsonData,dataType){
 		$g1=$svg.append("g").attr('id','group1').selectAll('#group1');
 
 		//指定要代入的資料矩陣是什麼
-		arr=arrFromObj(jsonData[dataType]);
-		//arr=arrCmetOverCmeo("h");
-		//console.log(arr);
+		$currArray=arrFromObj($jsonData[dataType]);
+		//$currArray=arrCmetOverCmeo("h");
+		//console.log($currArray);
 
 
-		$g1data=$g1.data(arr).enter();
+		$D3currArray=$g1.data($currArray).enter();
 
-		$g1data.append('rect')
+		$D3currArray.append('rect')
 			.attr('x',function(d,i){
-				return padding+i*unitWidth(arr)-rectWidth(arr);
+				return padding+i*unitWidth($currArray)-rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding;
 			})
 			.attr('width',function(d,i){
-				return rectWidth(arr)
+				return rectWidth($currArray)
 			})
 			.attr("height",0)
 			.transition()
-			.duration(3000)
+			.duration(1500)
 			.attr('y',function(d,i){
-				return height-padding-d*ylength/arrMax(arr);
+				return height-padding-d*ylength/arrMax($currArray);
 			})
 			.attr('height',function(d,i){
-				return d*ylength/arrMax(arr)
+				return d*ylength/arrMax($currArray)
 			})
 			.attr('fill','blue');
 
 		//加入tag的字
-		$g1data.append('text').text(function(d,i){return i})
+		$D3currArray.append('text').text(function(d,i){return i})
 			.attr('x',function(d,i){
-				return padding+i*unitWidth(arr)-(1.5)*rectWidth(arr);
+				return padding+i*unitWidth($currArray)-(1.5)*rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding+em;
-			});
+			})
+			.attr('class','tag');
 
 		//加入value的字
-		$g1data.append('text').text(function(d,i){return d})
+		$D3currArray.append('text')
 			//.attr('x',function(d,i){
-			//	return padding+i*xlength/arr.length-2*5;
+			//	return padding+i*xlength/$currArray.length-2*5;
 			//})
 			//.attr('y',function(d,i){
-			//	return height-padding-d*ylength/arrMax(arr);
+			//	return height-padding-d*ylength/arrMax($currArray);
 			//})
 			.attr('transform',function(d,i){
 				str="";
 				str+='translate(';
-				str+=(padding+i*unitWidth(arr));
+				str+=(padding+i*unitWidth($currArray));
 				str+=',';
-				str+=(height-padding-d*ylength/arrMax(arr))-em;
+				str+=(height-padding-d*ylength/arrMax($currArray))-em;
 				str+=')';
 				str+='rotate(-90)';
 				return str;
-			});
+			})
+			.attr('class','value')
+			.text(function(d,i){return d});
 
 
 	};
