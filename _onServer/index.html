@@ -61,16 +61,6 @@
 </div>
 </div>
 <script>
-w=800;
-h=600;
-
-//函式:把object轉成array
-arrFromObj=function(myObj){
-  arr=[]
-  $.each(myObj, function(i,n) {
-    arr.push(n);});
-  return arr;
-}
 
 strDataset="";
   $(document).ready(function(){
@@ -84,23 +74,32 @@ strDataset="";
           strDataset=xmlhttp.responseText;
           //$('#result').html(strDataset);
           objDataset=$.parseJSON(strDataset);
+          addSvgObjects(objDataset,$('#type-selector').val()+$('#dura-selector').val());
           visualize(objDataset,"cmeo.h");
           //$('#result').html(strDataset);
 
-          //換別種type
-          $('.type1').change(function(){
+
+          //換時間(小時/星期)的話就要重繪物件
+          $('#dura-selector').on('change',function(){
+            addSvgObjects(objDataset,$('#type-selector').val()+$('#dura-selector').val());
             visualize(objDataset,$('#type-selector').val()+$('#dura-selector').val());
-             $('#sortit').removeAttr("checked");
-             $('#hourRange').val('1');
-             if($('#dura-selector').val()=='w'){
+            $('#hourRange').val('1');
+            $('#sortit').removeAttr('disabled','disabled').removeAttr('checked')
+
+            if($('#dura-selector').val()=='.w'){
               $('#timeMerge').hide();
             }else{
               $('#timeMerge').show();
             }
+          })
+          //換別種type
+          $('.type1').change(function(){
+            visualize(objDataset,$('#type-selector').val()+$('#dura-selector').val());
+             
             //換區間選項打開制能
             $('select.timeMerge').each(function(a,b){$(b).removeAttr('disabled','disabled')});
             //排序選項打開制能
-            $('#sortit').removeAttr('disabled','disabled');
+            $('#sortit').removeAttr('disabled','disabled').removeAttr('checked');
           });
 
           //排序
