@@ -11,9 +11,12 @@ var $y;
 showTimeRange=function(intVal){
 	arrYPosition=[];
 	for (var i = 0; i < $currArray.length; i++) {
-		if(i%intVal==0)lastTotal=0;
+		if(i%intVal==0){
+			lastTotal=0;
+		}
 		arrYPosition[i]=lastTotal+$currArray[i];
 		lastTotal=arrYPosition[i];
+
 	};
 
 	
@@ -21,20 +24,90 @@ showTimeRange=function(intVal){
 		return i*30
 	})
 	.attr('y',function(d,i){
-		return height-padding-$y(arrYPosition[i]/intVal);
+		return $y(arrYPosition[i]/intVal);
 	})
 	.attr('height',function(d,i){
-		return $y(d/intVal)
+		return $height(d/intVal)
 	})
 	.attr('x',function(d,i){
-		return padding+$x(i-i%intVal)-rectWidth($currArray);
+		return $x(i-i%intVal)-rectWidth($currArray);
 	})
 	.attr('width',function(d,i){
-		return (width-2*padding)/($currArray.length/intVal)-rectWidth($currArray)
+		return rectWidth($currArray)*intVal;
 	})
 
 	;
 
+	$svg.selectAll('.value').transition().duration(1500)
+		.style('fill-opacity',0).remove();
+	$svg.selectAll('.tag').transition().duration(1500)
+		.style('fill-opacity',0).remove();
+		console.log(arrYPosition);
+	if(intVal==1){
+				//加入tag的字
+		$D3currArray.append('text').text(function(d,i){return i})
+			.attr('x',function(d,i){
+				return $x(i)-(1.5)*rectWidth($currArray);
+			})
+			.attr('y',function(d,i){
+				return height-padding+em;
+			})
+			.attr('class','tag')
+			.style('fill-opacity',0)
+			.transition().duration(1500)
+			.style('fill-opacity',1);
+
+					//加入value的字
+		$D3currArray.append('text')
+			
+			.attr('transform',function(d,i){
+				str="";
+				str+='translate(';
+				str+=($x(i));
+				str+=',';
+				str+=($y(d))-em;
+				str+=')';
+				str+='rotate(-90)';
+				return str;
+			})
+			.attr('class','value')
+			.text(function(d,i){
+				return (Math.floor(d*1000)/1000)
+			})
+			.style('fill-opacity',0)
+			.transition().duration(1500)
+			.style('fill-opacity',1);
+
+
+	}else{
+
+		for (var i = 0; i < arrYPosition.length/intVal; i++) {
+			$svg.append('text').attr('class','value')
+				.text((i*intVal+1)+'到'+(i+1)*intVal+"點")
+				.attr('x',$x(i*intVal)-(3)*rectWidth($currArray))
+				.attr('y',height-padding+em)
+				.style('fill-opacity',0)
+				.transition().duration(1500)
+				.style('fill-opacity',1);
+
+			$svg.append('text').attr('class','value')
+					.attr('transform',function(d,i2){
+					str="";
+					str+='translate(';
+					str+=($x(i*intVal));
+					str+=',';
+					str+=$y(arrYPosition[((i+1)*intVal)-1]/intVal)-em;
+					str+=')';
+					str+='rotate(-90)';
+					return str;
+				})
+				.attr('class','value')
+				.text(Math.floor((arrYPosition[((i+1)*intVal)-1]*1000)/1000))
+				.style('fill-opacity',0)
+				.transition().duration(1500)
+				.style('fill-opacity',1);
+		};
+	};
 
 
 }
@@ -47,19 +120,22 @@ showsortit=function(bVal){
 		for (var i = 0; i < sortArray.length; i++) {
 			orderArray[i]=sortArray.indexOf($currArray[i]);
 		};
+	}else{
+		orderArray=d3.range($currArray.length);
+	}
 
 		$svg.selectAll('rect').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+$x(orderArray[i])-rectWidth($currArray);
+			return $x(orderArray[i])-rectWidth($currArray);
 		});
 
 		$svg.selectAll('.tag').transition().duration(1500).delay(function(d,i){
 			return i*30
 		})
 		.attr('x',function(d,i){
-			return padding+$x(orderArray[i])-(1.5)*rectWidth($currArray);
+			return $x(orderArray[i])-(1.5)*rectWidth($currArray);
 		});
 
 		$svg.selectAll('.value').transition().duration(1500).delay(function(d,i){
@@ -68,46 +144,13 @@ showsortit=function(bVal){
 		.attr('transform',function(d,i){
 			str="";
 			str+='translate(';
-			str+=(padding+$x(orderArray[i]));
+			str+=($x(orderArray[i]));
 			str+=',';
-			str+=(height-padding-d*ylength/arrMax($currArray))-em;
+			str+=($y(d))-em;
 			str+=')';
 			str+='rotate(-90)';
 			return str;
 		});
-	}
-	else{
-		sortArray=$currArray.concat().sort(function(a,b){return b-a});
-		var orderArray=[];
-		for (var i = 0; i < sortArray.length; i++) {
-			orderArray[i]=sortArray.indexOf($currArray[i]);
-		};
-		$svg.selectAll('rect').transition().duration(1500).delay(function(d,i){
-			return i*30
-		})
-		.attr('x',function(d,i){
-			return padding+$x(i)-rectWidth($currArray);
-		});
-		$svg.selectAll('.tag').transition().duration(1500).delay(function(d,i){
-			return i*30
-		})
-		.attr('x',function(d,i){
-			return padding+$x(i)-(1.5)*rectWidth($currArray);
-		});
-		$svg.selectAll('.value').transition().duration(1500).delay(function(d,i){
-			return i*30
-		})
-		.attr('transform',function(d,i){
-			str="";
-			str+='translate(';
-			str+=(padding+$x(i));
-			str+=',';
-			str+=(height-padding-$y(d))-em;
-			str+=')';
-			str+='rotate(-90)';
-			return str;
-		});
-	}
 	
 
 
@@ -117,12 +160,14 @@ visualize=function(jsonData,dataType){
 
 	console.log(jsonData);
 	$jsonData=jsonData;
+	type1=dataType.split('.')[0];
+	typeDura=dataType.split('.')[1];
 
 	//取得cmet/cmeo的比例
 	//horw代入"h"或"w"可取得hour 或weekday的值
 	arrCmetOverCmeo=function(horw){
 		arrCmet=arrFromObj($jsonData["cmet."+horw]);
-		arrCmeo=arrFromObj($jsonData["cmeo."+horw])
+		arrCmeo=arrFromObj($jsonData["cmeo."+horw]);
 		arr=new Array();
 		for (var i = 0; i < arrCmet.length; i++) {
 			arr.push(arrCmet[i]/arrCmeo[i]);
@@ -176,19 +221,30 @@ visualize=function(jsonData,dataType){
 		$g1=$svg.append("g").attr('id','group1').selectAll('#group1');
 
 		//指定要代入的資料矩陣是什麼
-		$currArray=arrFromObj($jsonData[dataType]);
-		//$currArray=arrCmetOverCmeo("h");
+		if(type1=='cmeto'){
+			$currArray=arrCmetOverCmeo(typeDura);
+		}else{
+			$currArray=arrFromObj($jsonData[dataType]);
+		}
+		//
 		//console.log($currArray);
 
 
-		$x=d3.scale.ordinal().domain(d3.range($currArray.length)).rangePoints([0,width-2*padding]);
-		$y=d3.scale.linear().domain([0,arrMax()]).range([0,height-2*padding]);
+		$x=d3.scale.ordinal()
+			.domain(d3.range($currArray.length))
+			.rangePoints([padding,width-padding]);
+		$y=d3.scale.linear()
+			.domain([0,arrMax()])
+			.range([height-padding,padding]);
+		$height=d3.scale.linear()
+			.domain([0,arrMax()])
+			.range([0,height-2*padding]);
 
 		$D3currArray=$g1.data($currArray).enter();
 
 		$D3currArray.append('rect')
 			.attr('x',function(d,i){
-				return padding+$x(i)-rectWidth($currArray);
+				return $x(i)-rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding;
@@ -200,22 +256,23 @@ visualize=function(jsonData,dataType){
 			.transition()
 			.duration(1500)
 			.attr('y',function(d,i){
-				return height-padding-$y(d);
+				return $y(d);
 			})
 			.attr('height',function(d,i){
-				return $y(d)
+				return $height(d)
 			})
 			.attr('fill','blue');
 
 		//加入tag的字
 		$D3currArray.append('text').text(function(d,i){return i})
 			.attr('x',function(d,i){
-				return padding+$x(i)-(1.5)*rectWidth($currArray);
+				return $x(i)-(1.5)*rectWidth($currArray);
 			})
 			.attr('y',function(d,i){
 				return height-padding+em;
 			})
-			.attr('class','tag');
+			.attr('class','tag')
+			.style('fill-opacity',1);
 
 		//加入value的字
 		$D3currArray.append('text')
@@ -228,15 +285,29 @@ visualize=function(jsonData,dataType){
 			.attr('transform',function(d,i){
 				str="";
 				str+='translate(';
-				str+=(padding+$x(i));
+				str+=($x(i));
 				str+=',';
-				str+=(height-padding-$y(d))-em;
+				str+=($y(0))-em;
+				str+=')';
+				str+='rotate(-90)';
+				return str;
+			})
+			.transition().duration(1500)
+			.attr('transform',function(d,i){
+				str="";
+				str+='translate(';
+				str+=($x(i));
+				str+=',';
+				str+=($y(d))-em;
 				str+=')';
 				str+='rotate(-90)';
 				return str;
 			})
 			.attr('class','value')
-			.text(function(d,i){return d});
+			.text(function(d,i){
+				return (Math.floor(d*1000)/1000)
+			})
+			.style('fill-opacity',1);
 
 
 	};

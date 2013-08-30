@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>email的小秘密</title>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<link rel="stylesheet" href="bootstrap.min.css" type="text/css" media="screen" />
+<!--<script src='bootstrap.min.js'></script>-->
+<script src="myvisualizer.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body style="text-align: center;">
+<div style='margin:0 auto;width: 800px;'>
+  <div style="text-align: left;">
+
+    <select id='dura-selector' class='span2 type1'>
+      <option value=".h" selected='selected'>照小時計</option>
+      <option value=".w">照星期計</option>
+
+    </select>
+    <select id='type-selector' class="span2 type1">
+      <option value="cmeo" selected="selected">開信次數</option>
+      <option value="cmet">點擊次數</option>
+      <option value="cmeto">點擊/開信比</option>
+    </select>
+      
+    <div id='timeMerge' style='display:inline;'>
+      <span>週期:</span>
+    <select id='hourRange' class='timeMerge span2'>
+      <option value='1' selected='selected'>1小時</option>
+      <option value='2'>2小時</option>
+      <option value='3'>3小時</option>
+      <option value='4'>4小時</option>
+      <option value='6'>6小時</option>
+    </select>
+
+      <span style='display:none;'>Offset:</span>
+      <select id='hourOffset' class='timeMerge span2' style='display:none;'>
+      <option value='0' selected='selceted'>0</option>
+      <option value='1'>1</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option value='5'>5</option>
+    </select>
+  </div>
+
+      <input type="checkbox" id="sortit">排序</input>
+      
+  </div>
+  <div id='svg-container'>
+
+
+  </div>
+
+<div id='result'>
+
+</div>
+</div>
+<script>
+w=800;
+h=600;
+
+//函式:把object轉成array
+arrFromObj=function(myObj){
+  arr=[]
+  $.each(myObj, function(i,n) {
+    arr.push(n);});
+  return arr;
+}
+
+strDataset="";
+  $(document).ready(function(){
+    //Ajax load資料
+      xmlhttp=new XMLHttpRequest();
+      xmlhttp.open("GET","http://nettuesday.tw/sites/nettuesday.tw/ttt.php",true);
+      xmlhttp.send();
+  
+      xmlhttp.onreadystatechange=function(e){
+        if(xmlhttp.readyState==4){
+          strDataset=xmlhttp.responseText;
+          objDataset=$.parseJSON(strDataset);
+          visualize(objDataset,"cmeo.h");
+          //$('#result').html(strDataset);
+
+          //換別種type
+          $('.type1').change(function(){
+            visualize(objDataset,$('#type-selector').val()+$('#dura-selector').val());
+             $('#sortit').removeAttr("checked");
+             if($('#dura-selector').val()=='w'){
+              $('#timeMerge').hide();
+            }else{
+              $('#timeMerge').show();
+            }
+          });
+
+          //排序
+          $('#sortit').change(function(){
+            showsortit($('#sortit').is(":checked"));
+            if($('#sortit').is(":checked")){
+              $('select.timeMerge').each(function(a,b){$(b).attr('disabled','disabled')})
+            }else{
+              $('select.timeMerge').each(function(a,b){$(b).removeAttr('disabled','disabled')})
+            }
+          });
+
+          //推疊
+          $('.timeMerge').change(function(){
+            showTimeRange($('#hourRange').val(),$('#hourOffset').val());
+            if($('#hourRange').val()=="1"){
+              $('#sortit').removeAttr('disabled','disabled')
+            }else{
+               $('#sortit').attr('disabled','disabled')
+            }
+          })
+
+          $('.type1').click(function(){
+            visualize(objDataset,"cmeo.h");
+          });
+        }
+      }
+  });
+
+
+
+</script>
+</body>
+</html>
