@@ -42,7 +42,6 @@ showTimeRange=function(intVal){
 		.style('fill-opacity',0).remove();
 	$svg.selectAll('.tag').transition().duration(1500)
 		.style('fill-opacity',0).remove();
-		console.log(arrYPosition);
 	if(intVal==1){
 				//加入tag的字
 		$D3currArray.append('text').text(function(d,i){return i})
@@ -158,7 +157,6 @@ showsortit=function(bVal){
 
 visualize=function(jsonData,dataType){
 
-	console.log(jsonData);
 	$jsonData=jsonData;
 	type1=dataType.split('.')[0];
 	typeDura=dataType.split('.')[1];
@@ -176,7 +174,13 @@ visualize=function(jsonData,dataType){
 		return arr;
 	}
 
-	arrFromCSA=function(name1,csaKey){
+	arrFromCSA=function(csaKey,horw){
+		arrCSA=arrFromObj($jsonData['ccb.'+horw]);
+		arrReturn=[];
+		for (var i = 0; i < arrCSA.length; i++) {
+			arrReturn.push(arrCSA[i][csaKey]);
+		};
+		return arrReturn;
 
 	}
 
@@ -223,11 +227,12 @@ visualize=function(jsonData,dataType){
 		//指定要代入的資料矩陣是什麼
 		if(type1=='cmeto'){
 			$currArray=arrCmetOverCmeo(typeDura);
+		}else if(type1.substr(0,3)=='ccb'){
+			csaKey=type1.split('->')[1];
+			$currArray=arrFromCSA(csaKey,typeDura);
 		}else{
 			$currArray=arrFromObj($jsonData[dataType]);
 		}
-		//
-		//console.log($currArray);
 
 
 		$x=d3.scale.ordinal()
@@ -276,12 +281,6 @@ visualize=function(jsonData,dataType){
 
 		//加入value的字
 		$D3currArray.append('text')
-			//.attr('x',function(d,i){
-			//	return padding+i*xlength/$currArray.length-2*5;
-			//})
-			//.attr('y',function(d,i){
-			//	return height-padding-d*ylength/arrMax($currArray);
-			//})
 			.attr('transform',function(d,i){
 				str="";
 				str+='translate(';

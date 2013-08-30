@@ -22,6 +22,9 @@
       <option value="cmeo" selected="selected">開信次數</option>
       <option value="cmet">點擊次數</option>
       <option value="cmeto">點擊/開信比</option>
+      <option value="ccb->count">捐款人次</option>
+      <option value="ccb->sum">捐款總金額</option>
+      <option value="ccb->avg">平均捐款金額</option>
     </select>
       
     <div id='timeMerge' style='display:inline;'>
@@ -79,6 +82,7 @@ strDataset="";
       xmlhttp.onreadystatechange=function(e){
         if(xmlhttp.readyState==4){
           strDataset=xmlhttp.responseText;
+          //$('#result').html(strDataset);
           objDataset=$.parseJSON(strDataset);
           visualize(objDataset,"cmeo.h");
           //$('#result').html(strDataset);
@@ -87,19 +91,26 @@ strDataset="";
           $('.type1').change(function(){
             visualize(objDataset,$('#type-selector').val()+$('#dura-selector').val());
              $('#sortit').removeAttr("checked");
+             $('#hourRange').val('1');
              if($('#dura-selector').val()=='w'){
               $('#timeMerge').hide();
             }else{
               $('#timeMerge').show();
             }
+            //換區間選項打開制能
+            $('select.timeMerge').each(function(a,b){$(b).removeAttr('disabled','disabled')});
+            //排序選項打開制能
+            $('#sortit').removeAttr('disabled','disabled');
           });
 
           //排序
           $('#sortit').change(function(){
             showsortit($('#sortit').is(":checked"));
             if($('#sortit').is(":checked")){
+              //換區間選項關閉制能
               $('select.timeMerge').each(function(a,b){$(b).attr('disabled','disabled')})
             }else{
+              //換區間選項打開制能
               $('select.timeMerge').each(function(a,b){$(b).removeAttr('disabled','disabled')})
             }
           });
@@ -108,8 +119,10 @@ strDataset="";
           $('.timeMerge').change(function(){
             showTimeRange($('#hourRange').val(),$('#hourOffset').val());
             if($('#hourRange').val()=="1"){
+               //排序選項關閉制能
               $('#sortit').removeAttr('disabled','disabled')
             }else{
+               //排序選項打開制能
                $('#sortit').attr('disabled','disabled')
             }
           })
